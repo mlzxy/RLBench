@@ -221,11 +221,11 @@ class Scene(object):
                         depth = None
             return rgb, depth, pcd
 
-        def get_mask(sensor: VisionSensor, mask_fn):
+        def get_mask(sensor: VisionSensor, mask_fn, **kwargs):
             mask = None
             if sensor is not None:
                 sensor.handle_explicitly()
-                mask = mask_fn(sensor.capture_rgb())
+                mask = mask_fn(sensor.capture_rgb(), **kwargs)
             return mask
 
         left_shoulder_rgb, left_shoulder_depth, left_shoulder_pcd = get_rgb_depth(
@@ -243,17 +243,23 @@ class Scene(object):
         front_rgb, front_depth, front_pcd = get_rgb_depth(
             self._cam_front, fc_ob.rgb, fc_ob.depth, fc_ob.point_cloud,
             fc_ob.rgb_noise, fc_ob.depth_noise, fc_ob.depth_in_meters)
-
-        left_shoulder_mask = get_mask(self._cam_over_shoulder_left_mask,
-                                      lsc_mask_fn) if lsc_ob.mask else None
-        right_shoulder_mask = get_mask(self._cam_over_shoulder_right_mask,
-                                      rsc_mask_fn) if rsc_ob.mask else None
-        overhead_mask = get_mask(self._cam_overhead_mask,
-                                 oc_mask_fn) if oc_ob.mask else None
-        wrist_mask = get_mask(self._cam_wrist_mask,
-                              wc_mask_fn) if wc_ob.mask else None
-        front_mask = get_mask(self._cam_front_mask,
-                              fc_mask_fn) if fc_ob.mask else None
+        
+        object_names = {}
+        left_shoulder_mask, _ = get_mask(self._cam_over_shoulder_left_mask,
+                                    lsc_mask_fn, return_object_names=True) if lsc_ob.mask else None
+        object_names.update(_)
+        right_shoulder_mask, _ = get_mask(self._cam_over_shoulder_right_mask,
+                                    rsc_mask_fn, return_object_names=True) if rsc_ob.mask else None
+        object_names.update(_)
+        overhead_mask, _ = get_mask(self._cam_overhead_mask,
+                                    oc_mask_fn, return_object_names=True) if oc_ob.mask else None
+        object_names.update(_)
+        wrist_mask, _ = get_mask(self._cam_wrist_mask,
+                                    wc_mask_fn, return_object_names=True) if wc_ob.mask else None
+        object_names.update(_)
+        front_mask, _ = get_mask(self._cam_front_mask,
+                                    fc_mask_fn, return_object_names=True) if fc_ob.mask else None
+        object_names.update(_)
 
         obs = Observation(
             left_shoulder_rgb=left_shoulder_rgb,
@@ -307,7 +313,7 @@ class Scene(object):
             ignore_collisions=(
                 np.array((1.0 if self._ignore_collisions_for_current_waypoint else 0.0))
                 if self._obs_config.record_ignore_collisions else None),
-            misc=self._get_misc())
+            misc={**self._get_misc(), 'mask_id_2_object_name': object_names})
         obs = self.task.decorate_observation(obs)
         return obs
 

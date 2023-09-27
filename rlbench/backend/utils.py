@@ -217,11 +217,19 @@ def task_file_to_task_class(task_file):
   return task_class
 
 
-def rgb_handles_to_mask(rgb_coded_handles):
+def rgb_handles_to_mask(rgb_coded_handles, return_object_names=False):
   # rgb_coded_handles should be (w, h, c)
   # Handle encoded as : handle = R + G * 256 + B * 256 * 256
   rgb_coded_handles *= 255  # takes rgb range to 0 -> 255
   rgb_coded_handles.astype(int)
-  return (rgb_coded_handles[:, :, 0] +
+  result = (rgb_coded_handles[:, :, 0] +
           rgb_coded_handles[:, :, 1] * 256 +
           rgb_coded_handles[:, :, 2] * 256 * 256)
+
+  if return_object_names:
+      # ! get object names for mask
+      from pyrep.objects.object import Object
+      object_names = {int(a): Object.get_object_name(int(a)) for a in np.unique(result)}
+      return result, object_names
+  else:
+      return result
