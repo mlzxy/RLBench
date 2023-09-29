@@ -244,22 +244,16 @@ class Scene(object):
             self._cam_front, fc_ob.rgb, fc_ob.depth, fc_ob.point_cloud,
             fc_ob.rgb_noise, fc_ob.depth_noise, fc_ob.depth_in_meters)
         
-        object_names = {}
-        left_shoulder_mask, _ = get_mask(self._cam_over_shoulder_left_mask,
+        left_shoulder_mask, left_shoulder_object_names = get_mask(self._cam_over_shoulder_left_mask,
                                     lsc_mask_fn, return_object_names=True) if lsc_ob.mask else None
-        object_names.update(_)
-        right_shoulder_mask, _ = get_mask(self._cam_over_shoulder_right_mask,
+        right_shoulder_mask, right_shoulder_object_names = get_mask(self._cam_over_shoulder_right_mask,
                                     rsc_mask_fn, return_object_names=True) if rsc_ob.mask else None
-        object_names.update(_)
-        overhead_mask, _ = get_mask(self._cam_overhead_mask,
+        overhead_mask, overhead_object_names = get_mask(self._cam_overhead_mask,
                                     oc_mask_fn, return_object_names=True) if oc_ob.mask else None
-        object_names.update(_)
-        wrist_mask, _ = get_mask(self._cam_wrist_mask,
+        wrist_mask, wrist_object_names = get_mask(self._cam_wrist_mask,
                                     wc_mask_fn, return_object_names=True) if wc_ob.mask else None
-        object_names.update(_)
-        front_mask, _ = get_mask(self._cam_front_mask,
+        front_mask, wrist_object_names = get_mask(self._cam_front_mask,
                                     fc_mask_fn, return_object_names=True) if fc_ob.mask else None
-        object_names.update(_)
 
         obs = Observation(
             left_shoulder_rgb=left_shoulder_rgb,
@@ -313,7 +307,13 @@ class Scene(object):
             ignore_collisions=(
                 np.array((1.0 if self._ignore_collisions_for_current_waypoint else 0.0))
                 if self._obs_config.record_ignore_collisions else None),
-            misc={**self._get_misc(), 'mask_id_2_object_name': object_names})
+            misc={**self._get_misc(), 'object_ids': {
+                'left_shoulder': left_shoulder_object_names,
+                'right_shoulder': right_shoulder_object_names,
+                'overhead': overhead_object_names,
+                'wrist': wrist_mask,
+                'front': front_mask
+            }})
         obs = self.task.decorate_observation(obs)
         return obs
 

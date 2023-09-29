@@ -421,10 +421,17 @@ def main(argv):
                   if t != '__init__.py' and t.endswith('.py')]
 
     if len(FLAGS.tasks) > 0:
-        for t in FLAGS.tasks:
-            if t not in task_files:
-                raise ValueError('Task %s not recognised!.' % t)
-        task_files = FLAGS.tasks
+
+        if FLAGS.tasks[0] == 'rvt':
+            task_files = ['put_item_in_drawer', 'reach_and_drag', 'turn_tap', 'slide_block_to_color_target', 'open_drawer',
+                            'put_groceries_in_cupboard', 'place_shape_in_shape_sorter', 'put_money_in_safe', 'push_buttons',
+                            'close_jar', 'stack_blocks', 'place_cups', 'place_wine_at_rack_location', 'light_bulb_in',
+                            'sweep_to_dustpan_of_size', 'insert_onto_square_peg', 'meat_off_grill', 'stack_cups']
+        else:
+            for t in FLAGS.tasks:
+                if t not in task_files:
+                    raise ValueError('Task %s not recognised!.' % t)
+            task_files = FLAGS.tasks
 
     tasks = [task_file_to_task_class(t) for t in task_files]
 
