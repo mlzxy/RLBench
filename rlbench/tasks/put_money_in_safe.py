@@ -1,9 +1,10 @@
 from typing import List, Tuple
 import numpy as np
 from pyrep.objects.shape import Shape
+from pyrep.objects.joint import Joint
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.proximity_sensor import ProximitySensor
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from rlbench.backend.conditions import DetectedCondition, NothingGrasped
 from rlbench.backend.spawn_boundary import SpawnBoundary
 
@@ -14,6 +15,7 @@ class PutMoneyInSafe(Task):
 
     def init_task(self) -> None:
         self.index_dic = {0: 'bottom', 1: 'middle', 2: 'top'}
+        self.door = Joint('safe_joint')
         self.money = Shape('dollar_stack')
         self.money_boundary = Shape('dollar_stack_boundary')
         self.register_graspable_objects([self.money])
@@ -47,6 +49,9 @@ class PutMoneyInSafe(Task):
         b.sample(self.money,
                  min_rotation=(0.00, 0.00, 0.00),
                  max_rotation=(0.00, 0.00, +0.5 * np.pi))
+        
+        if ENHANCED_RANDOMNESS:
+            self.door.set_joint_position(np.random.uniform(-0.5*np.pi, 0.4*np.pi))
 
         return ['put the money away in the safe on the %s shelf'
                 % self.index_dic[index],

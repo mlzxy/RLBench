@@ -1,7 +1,9 @@
 from typing import List
+import numpy as np
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.joint import Joint
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
+from pyrep.objects.shape import Shape
 from rlbench.backend.conditions import JointCondition
 
 OPTIONS = ['left', 'right']
@@ -17,8 +19,16 @@ class TurnTap(Task):
         self.left_joint = Joint('left_joint')
         self.right_joint = Joint('right_joint')
 
+        self.tap_main = Shape('tap_main')
+
     def init_episode(self, index: int) -> List[str]:
         option = OPTIONS[index]
+
+        if ENHANCED_RANDOMNESS:
+            pos = self.tap_main.get_position()
+            pos[:2] += np.random.uniform(-0.1, 0.1, size=2) 
+            self.tap_main.set_position(pos)
+
         if option == 'right':
             self.left_start.set_position(self.right_start.get_position())
             self.left_start.set_orientation(self.right_start.get_orientation())

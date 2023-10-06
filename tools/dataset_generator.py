@@ -47,6 +47,8 @@ def check_and_make(dir):
         os.makedirs(dir)
 
 
+HEADLESS = False
+
 def save_demo(demo, example_path, variation):
 
     # Save image data first, and then None the image data, and pickle
@@ -213,7 +215,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
     rlbench_env = Environment(
         action_mode=MoveArmThenGripper(JointVelocity(), Discrete()),
         obs_config=obs_config,
-        headless=True)
+        headless=HEADLESS)
     rlbench_env.launch()
 
     task_env = None
@@ -340,7 +342,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
     rlbench_env = Environment(
         action_mode=MoveArmThenGripper(JointVelocity(), Discrete()),
         obs_config=obs_config,
-        headless=True)
+        headless=HEADLESS)
     rlbench_env.launch()
 
     task_env = None
@@ -464,4 +466,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-  app.run(main)
+    app.run(main)

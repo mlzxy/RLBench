@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from pyrep.objects.shape import Shape
 from pyrep.objects.proximity_sensor import ProximitySensor
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from pyrep.objects.dummy import Dummy
 from rlbench.backend.conditions import DetectedCondition, NothingGrasped
 
@@ -12,6 +12,7 @@ class PlaceWineAtRackLocation(Task):
 
     def init_task(self):
         self.wine_bottle = Shape('wine_bottle')
+        self.rack = Dummy('rack')
         self.register_graspable_objects([self.wine_bottle])
 
         self.locations = ['middle', 'left', 'right']
@@ -26,6 +27,16 @@ class PlaceWineAtRackLocation(Task):
     def init_episode(self, index: int) -> List[str]:
         self._variation_index = index
         location = self.locations[self._variation_index]
+
+        if ENHANCED_RANDOMNESS:
+            pos = self.wine_bottle.get_position()
+            pos[:2] += np.random.uniform(-0.2, 0.2, size=2) 
+            self.wine_bottle.set_position(pos)
+
+            pos = self.rack.get_position()
+            pos[:2] += np.random.uniform(-0.2, 0.2, size=2) 
+            self.rack.set_position(pos)
+
         self.register_success_conditions(
             [DetectedCondition(self.wine_bottle, 
                 ProximitySensor(f'success_{location}')),

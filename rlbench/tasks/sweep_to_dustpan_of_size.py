@@ -1,7 +1,8 @@
+import numpy as np
 from typing import List
 from pyrep.objects.shape import Shape
 from pyrep.objects.proximity_sensor import ProximitySensor
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from pyrep.objects.object import Object
 from pyrep.objects.dummy import Dummy
 from rlbench.backend.conditions import DetectedCondition
@@ -13,7 +14,9 @@ class SweepToDustpanOfSize(Task):
 
     def init_task(self) -> None:
         self._dustpan_sizes = ['tall', 'short']
-
+        self.shortpan = Shape('dustpan_short')
+        self.tallpan = Shape('dustpan_tall')
+        self.dust = Shape('dirt0')
         broom = Shape('broom')
         self.register_graspable_objects([broom])
 
@@ -30,6 +33,14 @@ class SweepToDustpanOfSize(Task):
     def init_episode(self, index: int) -> List[str]:
         self._variation_index = index
         dustpan_size = self._dustpan_sizes[self._variation_index]
+
+        if ENHANCED_RANDOMNESS:
+            tall_pos = self.tallpan.get_position(self.dust)
+            short_pos = self.shortpan.get_position(self.dust)
+            tall_pos[1] += np.random.uniform(-0.3, 0.1) 
+            short_pos[1] += np.random.uniform(-0.1, 0.3) 
+            self.tallpan.set_position(tall_pos, relative_to=self.dust)
+            self.shortpan.set_position(short_pos, relative_to=self.dust)
 
         success_sensor = ProximitySensor(f'success_{dustpan_size}')
         dirts = [Shape('dirt' + str(i)) for i in range(DIRT_NUM)]

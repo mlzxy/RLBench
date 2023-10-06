@@ -1,5 +1,5 @@
 from typing import List
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from rlbench.const import colors
 from rlbench.backend.conditions import NothingGrasped, DetectedCondition
 from rlbench.backend.spawn_boundary import SpawnBoundary
@@ -19,8 +19,14 @@ class LightBulbIn(Task):
         self.conditions = [NothingGrasped(self.robot.gripper)]
         self.register_graspable_objects(self.bulbs)
         self.boundary = Shape('spawn_boundary')
+        self.lamp_base = Shape('lamp_base')
 
     def init_episode(self, index: int) -> List[str]:
+        if ENHANCED_RANDOMNESS:
+            pos = self.lamp_base.get_position()
+            pos[:2] += np.random.uniform(-0.2, 0.2, size=2) 
+            self.lamp_base.set_position(pos)
+
         self._variation_index = index
         b = SpawnBoundary([self.boundary])
         for holder in self.holders:

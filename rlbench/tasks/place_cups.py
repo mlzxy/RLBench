@@ -6,7 +6,7 @@ from pyrep.objects.shape import Shape
 from rlbench.backend.conditions import DetectedCondition, NothingGrasped, \
     OrConditions
 from rlbench.backend.spawn_boundary import SpawnBoundary
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 
 
 class PlaceCups(Task):
@@ -15,6 +15,7 @@ class PlaceCups(Task):
         self._cups = [Shape('mug%d' % i) for i in range(3)]
         self._spokes = [Shape('place_cups_holder_spoke%d' % i) for i in
                         range(3)]
+        self.base = Shape('place_cups_holder_base')
         self._cups_boundary = Shape('mug_boundary')
         self._w1 = Dummy('waypoint1')
         self._w5 = Dummy('waypoint5')
@@ -28,6 +29,11 @@ class PlaceCups(Task):
         self._initial_relative_spoke = self._w5.get_pose(self._spokes[0])
 
     def init_episode(self, index: int) -> List[str]:
+        if ENHANCED_RANDOMNESS:
+            pos = self.base.get_position()
+            pos[:2] += np.random.uniform(-0.1, 0.1, size=2)
+            self.base.set_position(pos)
+
         self._cups_placed = 0
         self._index = index
         b = SpawnBoundary([self._cups_boundary])

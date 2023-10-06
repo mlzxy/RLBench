@@ -1,8 +1,9 @@
 from typing import List
+import numpy as np
 from pyrep.objects.shape import Shape
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.proximity_sensor import ProximitySensor
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from rlbench.backend.spawn_boundary import SpawnBoundary
 from rlbench.backend.conditions import DetectedCondition
 
@@ -29,9 +30,15 @@ class PlaceShapeInShapeSorter(Task):
         self.register_waypoint_ability_start(3, self._set_drop)
         self.boundary = SpawnBoundary([Shape('boundary')])
 
+
     def init_episode(self, index) -> List[str]:
         self.variation_index = index
         shape = SHAPE_NAMES[index]
+        if ENHANCED_RANDOMNESS:
+            pos = self.shape_sorter.get_position()
+            pos[:2] += np.random.uniform(-0.1, 0.1, size=2)
+            self.shape_sorter.set_position(pos)
+
         self.register_success_conditions(
             [DetectedCondition(self.shapes[index], self.success_sensor)])
 

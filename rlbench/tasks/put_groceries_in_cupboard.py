@@ -1,9 +1,10 @@
 from typing import List, Tuple
+import numpy as np
 from pyrep.objects.shape import Shape
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.object import Object
 from pyrep.objects.proximity_sensor import ProximitySensor
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from rlbench.backend.conditions import DetectedCondition, NothingGrasped
 from rlbench.backend.spawn_boundary import SpawnBoundary
 
@@ -30,8 +31,14 @@ class PutGroceriesInCupboard(Task):
         self.waypoint1 = Dummy('waypoint1')
         self.register_graspable_objects(self.groceries)
         self.boundary = SpawnBoundary([Shape('workspace')])
+        self.cupboard = Shape('cupboard')
 
     def init_episode(self, index: int) -> List[str]:
+
+        if ENHANCED_RANDOMNESS:
+            pos = self.cupboard.get_position()
+            self.cupboard.set_position(pos + np.random.uniform(-0.2, 0.2, size=3))
+
         self.boundary.clear()
         [self.boundary.sample(g, min_distance=0.1) for g in self.groceries]
         self.waypoint1.set_pose(self.grasp_points[index].get_pose())

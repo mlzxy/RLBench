@@ -1,5 +1,6 @@
+import numpy as np
 from typing import List
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 from rlbench.const import colors
 from rlbench.backend.conditions import NothingGrasped, DetectedCondition
 from pyrep.objects.shape import Shape
@@ -22,6 +23,12 @@ class ReachAndDrag(Task):
             DetectedCondition(self.cube, ProximitySensor('success0'))])
         color_name, color_rgb = colors[index]
         self.target.set_color(color_rgb)
+
+        if ENHANCED_RANDOMNESS:
+            ratio = 0.2
+            position = self.stick.get_position()
+            self.stick.set_position(position*np.random.uniform(1.0 - ratio, 1.0 + ratio, size=3))
+
 
         _, distractor1_rgb = colors[(index + 5) % len(colors)]
         self.distractor1.set_color(distractor1_rgb)

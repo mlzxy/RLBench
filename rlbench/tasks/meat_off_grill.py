@@ -1,9 +1,10 @@
 from typing import List
+import numpy as np
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.proximity_sensor import ProximitySensor
 from pyrep.objects.shape import Shape
 from rlbench.backend.conditions import NothingGrasped, DetectedCondition
-from rlbench.backend.task import Task
+from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 
 MEAT = ['chicken', 'steak']
 
@@ -13,6 +14,7 @@ class MeatOffGrill(Task):
     def init_task(self) -> None:
         self._steak = Shape('steak')
         self._chicken = Shape('chicken')
+        self._grill = Shape('grill')
         self._success_sensor = ProximitySensor('success')
         self.register_graspable_objects([self._chicken, self._steak])
         self._w1 = Dummy('waypoint1')
@@ -20,6 +22,26 @@ class MeatOffGrill(Task):
 
     def init_episode(self, index: int) -> List[str]:
         conditions = [NothingGrasped(self.robot.gripper)]
+        if ENHANCED_RANDOMNESS:
+            pos = self._grill.get_position()
+            pos[:2] += np.random.uniform(-0.1, 0.1, size=2) 
+            self._grill.set_position(pos)
+
+            if np.random.uniform() > 0.5:
+                steak_pos = self._steak.get_pose()
+                chick_pos = self._chicken.get_pose()
+                self._chicken.set_pose(steak_pos)
+                self._steak.set_pose(chick_pos)
+
+            pos = self._steak.get_position(relative_to=self._steak)
+            pos[1] += np.random.uniform(-0.05, 0.05)
+            self._steak.set_position(pos, relative_to=self._steak)
+
+            pos = self._chicken.get_position(relative_to=self._chicken)
+            pos[1] += np.random.uniform(-0.05, 0.05)
+            self._chicken.set_position(pos, relative_to=self._chicken)
+
+
         if index == 0:
             x, y, _ = self._chicken.get_position()
             self._w1.set_position([x, y, self._w1z])

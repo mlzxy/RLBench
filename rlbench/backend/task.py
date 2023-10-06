@@ -2,7 +2,6 @@ import os
 import re
 from os.path import dirname, abspath, join
 from typing import List, Tuple, Callable, Union
-
 import numpy as np
 from pyrep import PyRep
 from pyrep.const import ObjectType
@@ -21,6 +20,7 @@ from rlbench.backend.waypoints import Point, PredefinedPath, Waypoint
 
 TASKS_PATH = join(dirname(abspath(__file__)), '../tasks')
 
+ENHANCED_RANDOMNESS = os.environ.get("RLBENCH_ENHANCED_RANDOMNESS", "0") == "1"
 
 class Task(object):
 

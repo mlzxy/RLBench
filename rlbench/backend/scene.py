@@ -221,12 +221,22 @@ class Scene(object):
                         depth = None
             return rgb, depth, pcd
 
-        def get_mask(sensor: VisionSensor, mask_fn, **kwargs):
+        def get_mask(sensor: VisionSensor, mask_fn, return_object_names=True, **kwargs):
             mask = None
             if sensor is not None:
                 sensor.handle_explicitly()
                 mask = mask_fn(sensor.capture_rgb(), **kwargs)
-            return mask
+            if return_object_names:
+                rgb_coded_handles = mask * 255  # takes rgb range to 0 -> 255
+                rgb_coded_handles.astype(int)
+                result = (rgb_coded_handles[:, :, 0] +
+                        rgb_coded_handles[:, :, 1] * 256 +
+                        rgb_coded_handles[:, :, 2] * 256 * 256)
+                from pyrep.objects.object import Object
+                object_names = {int(a): Object.get_object_name(int(a)) for a in np.unique(result)}
+                return mask, object_names
+            else:
+                return mask, None
 
         left_shoulder_rgb, left_shoulder_depth, left_shoulder_pcd = get_rgb_depth(
             self._cam_over_shoulder_left, lsc_ob.rgb, lsc_ob.depth, lsc_ob.point_cloud,
@@ -252,7 +262,7 @@ class Scene(object):
                                     oc_mask_fn, return_object_names=True) if oc_ob.mask else None
         wrist_mask, wrist_object_names = get_mask(self._cam_wrist_mask,
                                     wc_mask_fn, return_object_names=True) if wc_ob.mask else None
-        front_mask, wrist_object_names = get_mask(self._cam_front_mask,
+        front_mask, front_object_names = get_mask(self._cam_front_mask,
                                     fc_mask_fn, return_object_names=True) if fc_ob.mask else None
 
         obs = Observation(
@@ -311,8 +321,8 @@ class Scene(object):
                 'left_shoulder': left_shoulder_object_names,
                 'right_shoulder': right_shoulder_object_names,
                 'overhead': overhead_object_names,
-                'wrist': wrist_mask,
-                'front': front_mask
+                'wrist': wrist_object_names,
+                'front': front_object_names
             }})
         obs = self.task.decorate_observation(obs)
         return obs

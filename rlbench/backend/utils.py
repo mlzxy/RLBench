@@ -225,11 +225,4 @@ def rgb_handles_to_mask(rgb_coded_handles, return_object_names=False):
   result = (rgb_coded_handles[:, :, 0] +
           rgb_coded_handles[:, :, 1] * 256 +
           rgb_coded_handles[:, :, 2] * 256 * 256)
-
-  if return_object_names:
-      # ! get object names for mask
-      from pyrep.objects.object import Object
-      object_names = {int(a): Object.get_object_name(int(a)) for a in np.unique(result)}
-      return result, object_names
-  else:
-      return result
+  return result
