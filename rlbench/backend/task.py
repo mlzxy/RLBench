@@ -22,6 +22,9 @@ TASKS_PATH = join(dirname(abspath(__file__)), '../tasks')
 
 ENHANCED_RANDOMNESS = os.environ.get("RLBENCH_ENHANCED_RANDOMNESS", "0") == "1"
 
+if ENHANCED_RANDOMNESS:
+    print("[rlbench] enhanced randomness is enabled")
+
 class Task(object):
 
     def __init__(self, pyrep: PyRep, robot: Robot, name: str = None):

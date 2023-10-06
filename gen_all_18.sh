@@ -1,4 +1,4 @@
-python3  tools/dataset_generator.py  --tasks=rvt \
+RLBENCH_ENHANCED_RANDOMNESS=1 python3  tools/dataset_generator.py  --tasks=rvt \
         --save_path=/media/xinyu/UDrive/tmp/data/train \
         --image_size=128,128 \
         --renderer=opengl \

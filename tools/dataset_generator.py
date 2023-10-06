@@ -370,7 +370,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
 
         abort_variation = False
         for ex_idx in range(FLAGS.episodes_per_task):
-            attempts = 10
+            attempts = 25
             while attempts > 0:
                 try:
                     variation = np.random.randint(possible_variations)
@@ -423,12 +423,16 @@ def main(argv):
                   if t != '__init__.py' and t.endswith('.py')]
 
     if len(FLAGS.tasks) > 0:
-
-        if FLAGS.tasks[0] == 'rvt':
-            task_files = ['put_item_in_drawer', 'reach_and_drag', 'turn_tap', 'slide_block_to_color_target', 'open_drawer',
-                            'put_groceries_in_cupboard', 'place_shape_in_shape_sorter', 'put_money_in_safe', 'push_buttons',
-                            'close_jar', 'stack_blocks', 'place_cups', 'place_wine_at_rack_location', 'light_bulb_in',
-                            'sweep_to_dustpan_of_size', 'insert_onto_square_peg', 'meat_off_grill', 'stack_cups']
+        RVT_TASKS = ['put_item_in_drawer', 'reach_and_drag', 'turn_tap', 'slide_block_to_color_target', 'open_drawer',
+                                'put_groceries_in_cupboard', 'place_shape_in_shape_sorter', 'put_money_in_safe', 'push_buttons',
+                                'close_jar', 'stack_blocks', 'place_cups', 'place_wine_at_rack_location', 'light_bulb_in',
+                                'sweep_to_dustpan_of_size', 'insert_onto_square_peg', 'meat_off_grill', 'stack_cups']
+        if FLAGS.tasks[0].startswith('rvt'):
+            if FLAGS.tasks[0] == 'rvt':
+                task_files = RVT_TASKS
+            else:
+                task_ind = int(FLAGS.tasks[0][3:])
+                task_files = [RVT_TASKS[task_ind],]
         else:
             for t in FLAGS.tasks:
                 if t not in task_files:
