@@ -30,9 +30,9 @@ class PutItemInDrawer(Task):
         anchor = self._anchors[index]
 
         if ENHANCED_RANDOMNESS:
-            pos = self._drawer.get_position()
-            pos[:2] += np.random.uniform(-0.1, 0.1, size=2)
-            self._drawer.set_position(pos)
+            # pos = self._drawer.get_position()
+            # pos[:2] += np.random.uniform(-0.1, 0.1, size=2)
+            # self._drawer.set_position(pos)
 
             drawer_box = np.array(self._drawer.get_bounding_box())
             drawer_box *= 0.6

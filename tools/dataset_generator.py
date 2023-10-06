@@ -260,7 +260,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
         for ex_idx in range(FLAGS.episodes_per_task):
             print('Process', i, '// Task:', task_env.get_name(),
                   '// Variation:', my_variation_count, '// Demo:', ex_idx)
-            attempts = 10
+            attempts = 25
             while attempts > 0:
                 try:
                     task_env = rlbench_env.get_task(t)
