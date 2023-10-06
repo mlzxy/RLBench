@@ -47,7 +47,7 @@ def check_and_make(dir):
         os.makedirs(dir)
 
 
-HEADLESS = False
+HEADLESS = os.environ.get("HEADLESS", "1") == "1"
 
 def save_demo(demo, example_path, variation):
 
