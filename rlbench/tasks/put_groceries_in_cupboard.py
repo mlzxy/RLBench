@@ -35,9 +35,9 @@ class PutGroceriesInCupboard(Task):
 
     def init_episode(self, index: int) -> List[str]:
 
-        if ENHANCED_RANDOMNESS:
-            pos = self.cupboard.get_position()
-            self.cupboard.set_position(pos + np.random.uniform(-0.2, 0.2, size=3))
+        # if ENHANCED_RANDOMNESS:
+        #     pos = self.cupboard.get_position()
+        #     self.cupboard.set_position(pos + np.random.uniform(-0.2, 0.2, size=3))
 
         self.boundary.clear()
         [self.boundary.sample(g, min_distance=0.1) for g in self.groceries]

@@ -35,12 +35,12 @@ class SweepToDustpanOfSize(Task):
         dustpan_size = self._dustpan_sizes[self._variation_index]
 
         if ENHANCED_RANDOMNESS:
-            tall_pos = self.tallpan.get_position(self.dust)
-            short_pos = self.shortpan.get_position(self.dust)
-            tall_pos[1] += np.random.uniform(-0.3, 0.1) 
-            short_pos[1] += np.random.uniform(-0.1, 0.3) 
-            self.tallpan.set_position(tall_pos, relative_to=self.dust)
-            self.shortpan.set_position(short_pos, relative_to=self.dust)
+            pos = self.dust.get_position(self.dust)
+            if index == 0:
+                pos[1] += np.random.uniform(-0.15, 0.05) 
+            else:
+                pos[1] += np.random.uniform(-0.05, 0.15) 
+            self.dust.set_position(pos, relative_to=self.dust)
 
         success_sensor = ProximitySensor(f'success_{dustpan_size}')
         dirts = [Shape('dirt' + str(i)) for i in range(DIRT_NUM)]

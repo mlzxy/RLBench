@@ -27,29 +27,48 @@ class MeatOffGrill(Task):
             pos[:2] += np.random.uniform(-0.1, 0.1, size=2) 
             self._grill.set_position(pos)
 
-            if np.random.uniform() > 0.5:
-                steak_pos = self._steak.get_pose()
-                chick_pos = self._chicken.get_pose()
-                self._chicken.set_pose(steak_pos)
-                self._steak.set_pose(chick_pos)
+            # if np.random.uniform() > 0.5:
+            #     steak_pos = self._steak.get_pose()
+            #     chick_pos = self._chicken.get_pose()
+            #     self._chicken.set_pose(steak_pos)
+            #     self._steak.set_pose(chick_pos)
 
-            pos = self._steak.get_position(relative_to=self._steak)
-            pos[1] += np.random.uniform(-0.05, 0.05)
-            self._steak.set_position(pos, relative_to=self._steak)
 
-            pos = self._chicken.get_position(relative_to=self._chicken)
-            pos[1] += np.random.uniform(-0.05, 0.05)
-            self._chicken.set_position(pos, relative_to=self._chicken)
+
+
 
 
         if index == 0:
+            if ENHANCED_RANDOMNESS:
+                if np.random.uniform() > 0.5:
+                    steak_pos = self._steak.get_position()
+                    chick_pos = self._chicken.get_position()
+                    self._chicken.set_position(steak_pos)
+                    self._steak.set_position(chick_pos)
+                else:
+                    pos = self._chicken.get_position(relative_to=self._chicken)
+                    pos[1] += np.random.uniform(-0.05, 0.05)
+                    self._chicken.set_position(pos, relative_to=self._chicken)
+
             x, y, _ = self._chicken.get_position()
             self._w1.set_position([x, y, self._w1z])
+            # self._w1.set_orientation(self._chicken.get_orientation())
             conditions.append(
                 DetectedCondition(self._chicken, self._success_sensor))
         else:
+            if ENHANCED_RANDOMNESS:
+                if np.random.uniform() > 0.5:
+                    steak_pos = self._steak.get_position()
+                    chick_pos = self._chicken.get_position()
+                    self._chicken.set_position(steak_pos)
+                    self._steak.set_position(chick_pos)
+                else:
+                    pos = self._steak.get_position(relative_to=self._steak)
+                    pos[1] += np.random.uniform(-0.05, 0.05)
+                    self._steak.set_position(pos, relative_to=self._steak)
             x, y, _ = self._steak.get_position()
             self._w1.set_position([x, y, self._w1z])
+            # self._w1.set_orientation(self._steak.get_orientation())
             conditions.append(
                 DetectedCondition(self._steak, self._success_sensor))
         self.register_success_conditions(conditions)
