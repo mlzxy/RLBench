@@ -39,8 +39,8 @@ class PutItemInDrawer(Task):
             xshift, yshift = np.random.uniform(drawer_box[0], drawer_box[1]), \
                 np.random.uniform(drawer_box[2], drawer_box[3])
             item_position = self._item.get_position()
-            item_position[0] += max(drawer_box[:2]) #xshift
-            item_position[1] += min(drawer_box[2:4]) #yshift
+            item_position[0] += xshift
+            item_position[1] += yshift
             self._item.set_position(item_position)
 
         self._waypoint1.set_position(anchor.get_position())
