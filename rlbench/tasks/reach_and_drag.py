@@ -25,10 +25,18 @@ class ReachAndDrag(Task):
         self.target.set_color(color_rgb)
 
         if ENHANCED_RANDOMNESS:
-            ratio = 0.2
             position = self.stick.get_position()
-            self.stick.set_position(position*np.random.uniform(1.0 - ratio, 1.0 + ratio, size=3))
+            position[:2] += np.random.uniform(-0.1, 0.1, size=2)
+            self.stick.set_position(position)
 
+            pos = self.cube.get_position(self.cube)
+            pos[1] -= np.random.uniform(0, 0.13) #np.random.uniform(-0.1, 0.1)
+            self.cube.set_position(pos, self.cube)
+
+            for d in [self.distractor1, self.distractor2, self.distractor3]:
+                pos = d.get_position(d)
+                pos[:2] += np.random.uniform(-0.02, 0.02, size=2) #np.random.uniform(-0.1, 0.1)
+                d.set_position(pos, d)               
 
         _, distractor1_rgb = colors[(index + 5) % len(colors)]
         self.distractor1.set_color(distractor1_rgb)

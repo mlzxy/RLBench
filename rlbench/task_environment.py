@@ -82,6 +82,8 @@ class TaskEnvironment(object):
                 % self._task.get_name()) from e
 
         self._reset_called = True
+        print(f" -> {desc[0]}")
+
         # Returns a list of descriptions and the first observation
         return desc, self._scene.get_observation()
 
