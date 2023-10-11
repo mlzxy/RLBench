@@ -24,20 +24,6 @@ class ReachAndDrag(Task):
         color_name, color_rgb = colors[index]
         self.target.set_color(color_rgb)
 
-        if ENHANCED_RANDOMNESS:
-            position = self.stick.get_position()
-            position[:2] += np.random.uniform(-0.1, 0.1, size=2)
-            self.stick.set_position(position)
-
-            pos = self.cube.get_position(self.cube)
-            pos[1] -= np.random.uniform(0, 0.13) #np.random.uniform(-0.1, 0.1)
-            self.cube.set_position(pos, self.cube)
-
-            for d in [self.distractor1, self.distractor2, self.distractor3]:
-                pos = d.get_position(d)
-                pos[:2] += np.random.uniform(-0.02, 0.02, size=2) #np.random.uniform(-0.1, 0.1)
-                d.set_position(pos, d)               
-
         _, distractor1_rgb = colors[(index + 5) % len(colors)]
         self.distractor1.set_color(distractor1_rgb)
 
@@ -46,6 +32,21 @@ class ReachAndDrag(Task):
 
         _, distractor3_rgb = colors[(index + 7) % len(colors)]
         self.distractor3.set_color(distractor3_rgb)
+
+        if ENHANCED_RANDOMNESS:
+            position = self.stick.get_position()
+            position[:2] += np.random.uniform(-0.1, 0.1, size=2)
+            self.stick.set_position(position)
+
+            if np.random.randint(0, 2) == 0:
+                v = np.random.randint(0, 3)
+                if v == 0:
+                    self.distractor1.remove()
+                elif v == 1:
+                    self.distractor2.remove()
+                elif v == 2:
+                    self.distractor3.remove()
+
 
         return ['use the stick to drag the cube onto the %s target'
                 % color_name,
