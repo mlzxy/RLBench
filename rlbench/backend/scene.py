@@ -255,15 +255,15 @@ class Scene(object):
             fc_ob.rgb_noise, fc_ob.depth_noise, fc_ob.depth_in_meters)
         
         left_shoulder_mask, left_shoulder_object_names = get_mask(self._cam_over_shoulder_left_mask,
-                                    lsc_mask_fn, return_object_names=True) if lsc_ob.mask else None
+                                    lsc_mask_fn, return_object_names=True) if lsc_ob.mask else (None, None)
         right_shoulder_mask, right_shoulder_object_names = get_mask(self._cam_over_shoulder_right_mask,
-                                    rsc_mask_fn, return_object_names=True) if rsc_ob.mask else None
+                                    rsc_mask_fn, return_object_names=True) if rsc_ob.mask else (None, None)
         overhead_mask, overhead_object_names = get_mask(self._cam_overhead_mask,
-                                    oc_mask_fn, return_object_names=True) if oc_ob.mask else None
+                                    oc_mask_fn, return_object_names=True) if oc_ob.mask else (None, None)
         wrist_mask, wrist_object_names = get_mask(self._cam_wrist_mask,
-                                    wc_mask_fn, return_object_names=True) if wc_ob.mask else None
+                                    wc_mask_fn, return_object_names=True) if wc_ob.mask else (None, None)
         front_mask, front_object_names = get_mask(self._cam_front_mask,
-                                    fc_mask_fn, return_object_names=True) if fc_ob.mask else None
+                                    fc_mask_fn, return_object_names=True) if fc_ob.mask else (None, None)
 
         obs = Observation(
             left_shoulder_rgb=left_shoulder_rgb,
