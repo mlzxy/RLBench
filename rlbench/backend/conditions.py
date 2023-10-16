@@ -192,3 +192,18 @@ class OrConditions(Condition):
 
     def reset(self):
         self._current_condition_index = 0
+        
+        
+        
+
+class AndConditions(OrConditions):
+    def __init__(self, conditions: List[Condition]):
+        """Logical or over all conditions"""
+        self._conditions = conditions
+
+    def condition_met(self):
+        met = True
+        for cond in self._conditions:
+            ismet, term = cond.condition_met()
+            met &= ismet
+        return met, False

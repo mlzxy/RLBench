@@ -1,10 +1,11 @@
 from typing import List, Tuple
 import numpy as np
+import itertools
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.proximity_sensor import ProximitySensor
 from pyrep.objects.shape import Shape
 from rlbench.backend.conditions import DetectedCondition, NothingGrasped, \
-    OrConditions
+    OrConditions, AndConditions
 from rlbench.backend.spawn_boundary import SpawnBoundary
 from rlbench.backend.task import Task, ENHANCED_RANDOMNESS
 
@@ -23,7 +24,7 @@ class PlaceCups(Task):
             ProximitySensor('success_detector%d' % i) for i in range(3)]
         self._on_peg_conditions = [OrConditions([
             DetectedCondition(self._cups[ci], success_detectors[sdi]) for sdi in
-            range(3)]) for ci in range(3)]
+            range(3)]) for ci in range(3)] # for each cup, the condition of its being on-peg
         self.register_graspable_objects(self._cups)
         self._initial_relative_cup = self._w1.get_pose(self._cups[0])
         self._initial_relative_spoke = self._w5.get_pose(self._spokes[0])
@@ -38,8 +39,12 @@ class PlaceCups(Task):
         self._index = index
         b = SpawnBoundary([self._cups_boundary])
         [b.sample(c, min_distance=0.10) for c in self._cups]
-        success_conditions = [NothingGrasped(self.robot.gripper)
-                              ] + self._on_peg_conditions[:index + 1]
+        success_conditions = [NothingGrasped(self.robot.gripper)]
+        # bug fix
+        success_conditions.append(OrConditions([
+            AndConditions(conds) for conds in itertools.combinations(self._on_peg_conditions, index + 1)
+        ]))
+
         self.register_success_conditions(success_conditions)
         self.register_waypoint_ability_start(
             0, self._move_above_next_target)
