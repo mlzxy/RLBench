@@ -19,6 +19,7 @@ class CloseJar(Task):
         self.boundary = Shape('spawn_boundary')
         self.conditions = [NothingGrasped(self.robot.gripper)]
 
+
     def init_episode(self, index: int) -> List[str]:
         b = SpawnBoundary([self.boundary])
         for obj in self.jars:
@@ -39,6 +40,11 @@ class CloseJar(Task):
         self.jars[index % 2].set_color(target_color_rgb)
         other_index = {0: 1, 1: 0}
         self.jars[other_index[index % 2]].set_color(distractor_color_rgb)
+
+        # register color information
+        self.target = f'jar{index % 2}'
+        self.distractors = [f'jar{other_index[index % 2]}']
+
         self.conditions += [DetectedCondition(self.lid, success)]
         self.register_success_conditions(self.conditions)
         return ['close the %s jar' % target_color_name,
@@ -61,3 +67,4 @@ class CloseJar(Task):
         # unscrew, leading to a weird jitery and tilted cap while unscrewing.
         # Issue occured rarely so is only minor
         return (0.0, 0.0, -0.6*np.pi), (0.0, 0.0, +0.6*np.pi)
+    

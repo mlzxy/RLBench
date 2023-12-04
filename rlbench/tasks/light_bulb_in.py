@@ -44,6 +44,11 @@ class LightBulbIn(Task):
         self.holders[index % 2].set_color(target_color_rgb)
         other_index = {0: 1, 1: 0}
         self.holders[other_index[index % 2]].set_color(distractor_color_rgb)
+
+        # register color information
+        self.target = self.holders[index % 2].get_name()
+        self.distractors = [self.holders[other_index[index % 2]].get_name(), ]
+
         self.register_success_conditions([DetectedCondition(
                                               self.bulbs[index % 2],
                                               ProximitySensor('success')),
