@@ -42,8 +42,8 @@ class CloseJar(Task):
         self.jars[other_index[index % 2]].set_color(distractor_color_rgb)
 
         # register color information
-        self.target = f'jar{index % 2}'
-        self.distractors = [f'jar{other_index[index % 2]}']
+        self._color_target = f'jar{index % 2}'
+        self._color_distractors = [f'jar{other_index[index % 2]}']
 
         self.conditions += [DetectedCondition(self.lid, success)]
         self.register_success_conditions(self.conditions)

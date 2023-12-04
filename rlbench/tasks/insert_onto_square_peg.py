@@ -36,8 +36,8 @@ class InsertOntoSquarePeg(Task):
         spokes.remove(chosen_pillar)
 
         # register color information
-        self.target = chosen_pillar.get_name() 
-        self.distractors = [s.get_name() for s in spokes]
+        self._color_target = chosen_pillar.get_name() 
+        self._color_distractors = [s.get_name() for s in spokes]
 
         for spoke, i in zip(spokes, color_choices):
             name, rgb = colors[i]
