@@ -3,4 +3,4 @@ python3  tools/dataset_generator.py  --tasks=novel \
         --image_size=128,128 \
         --renderer=opengl \
         --episodes_per_task=25 \
-        --processes=1
+        --processes=1 --skip_images=True

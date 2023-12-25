@@ -45,7 +45,9 @@ flags.DEFINE_integer(
 flags.DEFINE_bool(
     "all_variations", True, "Include all variations when sampling epsiodes"
 )
-
+flags.DEFINE_bool(
+    "skip_images", False, "whether skip saving images during dataset generation, useful for generating test set"
+)
 
 def check_and_make(dir):
     if not os.path.exists(dir):
@@ -55,7 +57,7 @@ def check_and_make(dir):
 HEADLESS = os.environ.get("HEADLESS", "1") == "1"
 
 
-def save_demo(demo, example_path, variation):
+def save_demo(demo, example_path, variation, skip_images=False):
     # Save image data first, and then None the image data, and pickle
     left_shoulder_rgb_path = os.path.join(example_path, LEFT_SHOULDER_RGB_FOLDER)
     left_shoulder_depth_path = os.path.join(example_path, LEFT_SHOULDER_DEPTH_FOLDER)
@@ -120,27 +122,28 @@ def save_demo(demo, example_path, variation):
         )
         front_mask = Image.fromarray((obs.front_mask * 255).astype(np.uint8))
 
-        left_shoulder_rgb.save(os.path.join(left_shoulder_rgb_path, IMAGE_FORMAT % i))
-        left_shoulder_depth.save(
-            os.path.join(left_shoulder_depth_path, IMAGE_FORMAT % i)
-        )
-        left_shoulder_mask.save(os.path.join(left_shoulder_mask_path, IMAGE_FORMAT % i))
-        right_shoulder_rgb.save(os.path.join(right_shoulder_rgb_path, IMAGE_FORMAT % i))
-        right_shoulder_depth.save(
-            os.path.join(right_shoulder_depth_path, IMAGE_FORMAT % i)
-        )
-        right_shoulder_mask.save(
-            os.path.join(right_shoulder_mask_path, IMAGE_FORMAT % i)
-        )
-        overhead_rgb.save(os.path.join(overhead_rgb_path, IMAGE_FORMAT % i))
-        overhead_depth.save(os.path.join(overhead_depth_path, IMAGE_FORMAT % i))
-        overhead_mask.save(os.path.join(overhead_mask_path, IMAGE_FORMAT % i))
-        wrist_rgb.save(os.path.join(wrist_rgb_path, IMAGE_FORMAT % i))
-        wrist_depth.save(os.path.join(wrist_depth_path, IMAGE_FORMAT % i))
-        wrist_mask.save(os.path.join(wrist_mask_path, IMAGE_FORMAT % i))
-        front_rgb.save(os.path.join(front_rgb_path, IMAGE_FORMAT % i))
-        front_depth.save(os.path.join(front_depth_path, IMAGE_FORMAT % i))
-        front_mask.save(os.path.join(front_mask_path, IMAGE_FORMAT % i))
+        if not skip_images:
+            left_shoulder_rgb.save(os.path.join(left_shoulder_rgb_path, IMAGE_FORMAT % i))
+            left_shoulder_depth.save(
+                os.path.join(left_shoulder_depth_path, IMAGE_FORMAT % i)
+            )
+            left_shoulder_mask.save(os.path.join(left_shoulder_mask_path, IMAGE_FORMAT % i))
+            right_shoulder_rgb.save(os.path.join(right_shoulder_rgb_path, IMAGE_FORMAT % i))
+            right_shoulder_depth.save(
+                os.path.join(right_shoulder_depth_path, IMAGE_FORMAT % i)
+            )
+            right_shoulder_mask.save(
+                os.path.join(right_shoulder_mask_path, IMAGE_FORMAT % i)
+            )
+            overhead_rgb.save(os.path.join(overhead_rgb_path, IMAGE_FORMAT % i))
+            overhead_depth.save(os.path.join(overhead_depth_path, IMAGE_FORMAT % i))
+            overhead_mask.save(os.path.join(overhead_mask_path, IMAGE_FORMAT % i))
+            wrist_rgb.save(os.path.join(wrist_rgb_path, IMAGE_FORMAT % i))
+            wrist_depth.save(os.path.join(wrist_depth_path, IMAGE_FORMAT % i))
+            wrist_mask.save(os.path.join(wrist_mask_path, IMAGE_FORMAT % i))
+            front_rgb.save(os.path.join(front_rgb_path, IMAGE_FORMAT % i))
+            front_depth.save(os.path.join(front_depth_path, IMAGE_FORMAT % i))
+            front_mask.save(os.path.join(front_mask_path, IMAGE_FORMAT % i))
 
         # We save the images separately, so set these to None for pickling.
         obs.left_shoulder_rgb = None
@@ -267,6 +270,9 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
                 "// Demo:",
                 ex_idx,
             )
+            demo = None
+            import gc
+            gc.collect()
             attempts = 25
             while attempts > 0:
                 try:
@@ -291,7 +297,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
                     break
                 episode_path = os.path.join(episodes_path, EPISODE_FOLDER % ex_idx)
                 with file_lock:
-                    save_demo(demo, episode_path, my_variation_count)
+                    save_demo(demo, episode_path, my_variation_count, skip_images=FLAGS.skip_images)
 
                     with open(
                         os.path.join(episode_path, VARIATION_DESCRIPTIONS), "wb"
@@ -415,7 +421,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
                     break
                 episode_path = os.path.join(episodes_path, EPISODE_FOLDER % ex_idx)
                 with file_lock:
-                    save_demo(demo, episode_path, variation)
+                    save_demo(demo, episode_path, variation, skip_images=FLAGS.skip_images)
 
                     with open(
                         os.path.join(episode_path, VARIATION_DESCRIPTIONS), "wb"
