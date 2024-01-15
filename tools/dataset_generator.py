@@ -27,6 +27,7 @@ flags.DEFINE_list(
     "tasks", [], "The tasks to collect. If empty, all tasks are collected."
 )
 flags.DEFINE_list("image_size", [128, 128], "The size of the images tp save.")
+flags.DEFINE_list("front_image_size", [128, 128], 'the size of the front camera')
 flags.DEFINE_enum(
     "renderer",
     "opengl3",
@@ -207,6 +208,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
     num_tasks = len(tasks)
 
     img_size = list(map(int, FLAGS.image_size))
+    front_image_size = list(map(int, FLAGS.front_image_size))
 
     obs_config = ObservationConfig()
     obs_config.set_all(True)
@@ -214,7 +216,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
     obs_config.left_shoulder_camera.image_size = img_size
     obs_config.overhead_camera.image_size = img_size
     obs_config.wrist_camera.image_size = img_size
-    obs_config.front_camera.image_size = img_size
+    obs_config.front_camera.image_size = front_image_size
 
     # Store depth as 0 - 1
     obs_config.right_shoulder_camera.depth_in_meters = False
@@ -343,6 +345,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
     num_tasks = len(tasks)
 
     img_size = list(map(int, FLAGS.image_size))
+    front_image_size = list(map(int, FLAGS.front_image_size))
 
     obs_config = ObservationConfig()
     obs_config.set_all(True)
@@ -350,7 +353,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
     obs_config.left_shoulder_camera.image_size = img_size
     obs_config.overhead_camera.image_size = img_size
     obs_config.wrist_camera.image_size = img_size
-    obs_config.front_camera.image_size = img_size
+    obs_config.front_camera.image_size = front_image_size
 
     # Store depth as 0 - 1
     obs_config.right_shoulder_camera.depth_in_meters = False
@@ -492,35 +495,33 @@ def main(argv):
         ]
 
         NOVEL_TASKS = [
-            # "take_money_out_safe", 
-            # "take_umbrella_out_of_umbrella_stand",
-            # "slide_cabinet_open_and_place_cups"
-            # "take_toilet_roll_off_stand"
+            "take_money_out_safe", 
+            "take_umbrella_out_of_umbrella_stand",
+            "slide_cabinet_open_and_place_cups",
+            "take_toilet_roll_off_stand",
             
             "basketball_in_hoop", 
-            # "straighten_rope",
-            # "put_rubbish_in_bin",
-            # "tv_on", 
-            # # "scoop_with_spatula", 
-            # # "place_hanger_on_rack", 
-            # # "hit_ball_with_queue", 
-            # "block_pyramid", 
-            # "take_shoes_out_of_box", 
-            # # "take_lid_off_saucepan", 
-            # "lamp_on", 
-            # # "phone_on_base", 
-            # "open_box", 
-            # # "close_laptop_lid", 
-            # # "beat_the_buzz", 
-            # "remove_cups", 
-            # # "play_jenga", 
-            # # "put_knife_on_chopping_board", 
-            # # "insert_usb_in_computer", 
-            # # "change_clock", 
-            # # "open_window", 
-            # # "open_wine_bottle", 
-            # "open_door",
-            # "close_microwave"
+            "straighten_rope",
+            "put_rubbish_in_bin",
+            "tv_on", 
+            "scoop_with_spatula", 
+            "place_hanger_on_rack", 
+            "hit_ball_with_queue", 
+            "block_pyramid", 
+            "take_lid_off_saucepan", 
+            "lamp_on", 
+            "phone_on_base", 
+            "open_box", 
+            "close_laptop_lid", 
+            "beat_the_buzz", 
+            "remove_cups", 
+            "play_jenga", 
+            "put_knife_on_chopping_board", 
+            "change_clock", 
+            "open_window", 
+            "open_wine_bottle", 
+            "open_door",
+            "close_microwave"
         ]
 
         if FLAGS.tasks[0].startswith("rvt"):
@@ -539,6 +540,8 @@ def main(argv):
                 task_files = [
                     NOVEL_TASKS[task_ind],
                 ]
+        elif FLAGS.tasks[0].startswith('all'):
+            task_files = RVT_TASKS + NOVEL_TASKS
         else:
             for t in FLAGS.tasks:
                 if t not in task_files:
