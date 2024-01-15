@@ -47,6 +47,7 @@ class Scene(object):
         self._cam_overhead = VisionSensor('cam_overhead')
         self._cam_wrist = VisionSensor('cam_wrist')
         self._cam_front = VisionSensor('cam_front')
+        self._cam_inspector = VisionSensor('cam_inspector')
         self._cam_over_shoulder_left_mask = VisionSensor(
             'cam_over_shoulder_left_mask')
         self._cam_over_shoulder_right_mask = VisionSensor(
@@ -254,6 +255,11 @@ class Scene(object):
             self._cam_front, fc_ob.rgb, fc_ob.depth, fc_ob.point_cloud,
             fc_ob.rgb_noise, fc_ob.depth_noise, fc_ob.depth_in_meters)
         
+        if self._obs_config.use_inspector_cam:
+            cfg = self._obs_config.inspector_cam_config
+            inspector_rgb, inspector_depth, inspector_pcd = get_rgb_depth(self._cam_inspector, cfg.rgb, cfg.depth, cfg.point_cloud, cfg.rgb_noise, cfg.depth_noise, cfg.depth_in_meters) 
+        
+        
         left_shoulder_mask, left_shoulder_object_names = get_mask(self._cam_over_shoulder_left_mask,
                                     lsc_mask_fn, return_object_names=True) if lsc_ob.mask else (None, None)
         right_shoulder_mask, right_shoulder_object_names = get_mask(self._cam_over_shoulder_right_mask,
@@ -324,6 +330,12 @@ class Scene(object):
                 'wrist': wrist_object_names,
                 'front': front_object_names
             }})
+        
+        if self._obs_config.use_inspector_cam:
+            obs.inspector_depth = inspector_depth
+            obs.inspector_point_cloud = inspector_pcd
+            obs.inspector_rgb = inspector_rgb
+            
         obs = self.task.decorate_observation(obs)
         return obs
 
@@ -494,6 +506,12 @@ class Scene(object):
                 else:
                     mask_cam.set_explicit_handling(1)
                     mask_cam.set_resolution(conf.image_size)
+        
+        if self._obs_config.use_inspector_cam:
+            _set_rgb_props(self._cam_inspector, self._obs_config.inspector_cam_config.rgb, 
+                        self._obs_config.inspector_cam_config.depth, 
+                        self._obs_config.inspector_cam_config) 
+        
         _set_rgb_props(
             self._cam_over_shoulder_left,
             self._obs_config.left_shoulder_camera.rgb,
@@ -562,4 +580,6 @@ class Scene(object):
         misc.update(_get_cam_data(self._cam_overhead, 'overhead_camera'))
         misc.update(_get_cam_data(self._cam_front, 'front_camera'))
         misc.update(_get_cam_data(self._cam_wrist, 'wrist_camera'))
+        if self._obs_config.use_inspector_cam:
+            misc.update(_get_cam_data(self._cam_inspector, 'inspector_camera'))
         return misc

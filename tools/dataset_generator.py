@@ -48,6 +48,8 @@ flags.DEFINE_bool(
 flags.DEFINE_bool(
     "skip_images", False, "whether skip saving images during dataset generation, useful for generating test set"
 )
+flags.DEFINE_bool('use_inspector_cam', False, '')
+
 
 def check_and_make(dir):
     if not os.path.exists(dir):
@@ -75,6 +77,11 @@ def save_demo(demo, example_path, variation, skip_images=False):
     front_depth_path = os.path.join(example_path, FRONT_DEPTH_FOLDER)
     front_mask_path = os.path.join(example_path, FRONT_MASK_FOLDER)
 
+    inspector_rgb_path = os.path.join(
+        example_path, "inspector_rgb")
+    inspector_depth_path = os.path.join(
+        example_path, "inspector_depth")
+
     check_and_make(left_shoulder_rgb_path)
     check_and_make(left_shoulder_depth_path)
     check_and_make(left_shoulder_mask_path)
@@ -90,6 +97,9 @@ def save_demo(demo, example_path, variation, skip_images=False):
     check_and_make(front_rgb_path)
     check_and_make(front_depth_path)
     check_and_make(front_mask_path)
+    check_and_make(inspector_rgb_path)
+    check_and_make(inspector_depth_path)
+
 
     for i, obs in enumerate(demo):
         left_shoulder_rgb = Image.fromarray(obs.left_shoulder_rgb)
@@ -144,6 +154,14 @@ def save_demo(demo, example_path, variation, skip_images=False):
             front_rgb.save(os.path.join(front_rgb_path, IMAGE_FORMAT % i))
             front_depth.save(os.path.join(front_depth_path, IMAGE_FORMAT % i))
             front_mask.save(os.path.join(front_mask_path, IMAGE_FORMAT % i))
+        
+        if obs.inspector_rgb is not None:
+            inspector_rgb = Image.fromarray(obs.inspector_rgb)
+            inspector_depth = utils.float_array_to_rgb_image(
+            obs.inspector_depth, scale_factor=DEPTH_SCALE)
+            inspector_rgb.save(os.path.join(inspector_rgb_path, IMAGE_FORMAT % i))
+            inspector_depth.save(os.path.join(inspector_depth_path, IMAGE_FORMAT % i))
+
 
         # We save the images separately, so set these to None for pickling.
         obs.left_shoulder_rgb = None
@@ -166,6 +184,11 @@ def save_demo(demo, example_path, variation, skip_images=False):
         obs.front_depth = None
         obs.front_point_cloud = None
         obs.front_mask = None
+
+        obs.inspector_point_cloud = None
+        obs.inspector_rgb = None
+        obs.inspector_depth = None
+
 
     # Save the low-dimension data
     with open(os.path.join(example_path, LOW_DIM_PICKLE), "wb") as f:
@@ -311,7 +334,7 @@ def run(i, lock, task_index, variation_count, results, file_lock, tasks):
     rlbench_env.shutdown()
 
 
-def run_all_variations(i, lock, task_index, variation_count, results, file_lock, tasks):
+def run_all_variations(i, lock, task_index, variation_count, results, file_lock, tasks, use_inspector_cam=False):
     """Each thread will choose one task and variation, and then gather
     all the episodes_per_task for that variation."""
 
@@ -342,6 +365,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
     obs_config.overhead_camera.masks_as_one_channel = False
     obs_config.wrist_camera.masks_as_one_channel = False
     obs_config.front_camera.masks_as_one_channel = False
+    obs_config.use_inspector_cam = use_inspector_cam
 
     if FLAGS.renderer == "opengl":
         obs_config.right_shoulder_camera.render_mode = RenderMode.OPENGL
@@ -468,46 +492,35 @@ def main(argv):
         ]
 
         NOVEL_TASKS = [
-            "basketball_in_hoop",
-            "beat_the_buzz",
-            "block_pyramid",
-            "change_channel",
-            "change_clock",
-            "close_box",
-            "close_door",
-            "insert_usb_in_computer",
-            "close_grill",
-            "close_laptop_lid",
-            "open_microwave",
-            "empty_container",
-            "empty_dishwasher",
-            "get_ice_from_fridge",
-            "hang_frame_on_hanger",
-            "hit_ball_with_queue",
-            "hockey",
-            "press_switch",
-            "open_window",
-            "open_wine_bottle",
-            "phone_on_base",
-            "place_hanger_on_rack",
-            "plug_charger_in_power_supply",
-            "play_jenga",
-            "pour_from_cup_to_cup",
-            "put_books_at_shelf_location",
-            "put_bottle_in_fridge",
-            "put_umbrella_in_umbrella_stand",
-            "turn_oven_on",
-            "put_rubbish_in_color_bin",
-            "put_knife_on_chopping_board",
-            "scoop_with_spatula",
-            "screw_nail",
-            "setup_checkers",
-            "setup_chess",
-            "solve_puzzle",
-            "straighten_rope",
-            "take_lid_off_saucepan",
-            "water_plants",
-            "wipe_desk",
+            # "take_money_out_safe", 
+            # "take_umbrella_out_of_umbrella_stand",
+            # "slide_cabinet_open_and_place_cups"
+            # "take_toilet_roll_off_stand"
+            
+            "basketball_in_hoop", 
+            # "straighten_rope",
+            # "put_rubbish_in_bin",
+            # "tv_on", 
+            # # "scoop_with_spatula", 
+            # # "place_hanger_on_rack", 
+            # # "hit_ball_with_queue", 
+            # "block_pyramid", 
+            # "take_shoes_out_of_box", 
+            # # "take_lid_off_saucepan", 
+            # "lamp_on", 
+            # # "phone_on_base", 
+            # "open_box", 
+            # # "close_laptop_lid", 
+            # # "beat_the_buzz", 
+            # "remove_cups", 
+            # # "play_jenga", 
+            # # "put_knife_on_chopping_board", 
+            # # "insert_usb_in_computer", 
+            # # "change_clock", 
+            # # "open_window", 
+            # # "open_wine_bottle", 
+            # "open_door",
+            # "close_microwave"
         ]
 
         if FLAGS.tasks[0].startswith("rvt"):
@@ -544,11 +557,13 @@ def main(argv):
     lock = manager.Lock()
 
     check_and_make(FLAGS.save_path)
+    if FLAGS.use_inspector_cam:
+        print("USE INSPECTOR CAM!!!")
 
     if FLAGS.all_variations:
         # multiprocessing for all_variations not support (for now)
         run_all_variations(
-            0, lock, task_index, variation_count, result_dict, file_lock, tasks
+            0, lock, task_index, variation_count, result_dict, file_lock, tasks, FLAGS.use_inspector_cam
         )
     else:
         processes = [

@@ -68,6 +68,10 @@ class Observation(object):
         self.task_low_dim_state = task_low_dim_state
         self.ignore_collisions = ignore_collisions
         self.misc = misc
+        
+        self.inspector_rgb = None
+        self.inspector_depth = None
+        self.inspector_point_cloud = None
 
     def get_low_dim_data(self) -> np.ndarray:
         """Gets a 1D array of all the low-dimensional obseervations.

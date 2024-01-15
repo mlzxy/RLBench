@@ -54,6 +54,9 @@ class ObservationConfig(object):
                  record_gripper_closing=False,
                  task_low_dim_state=False,
                  record_ignore_collisions=True,
+                 
+                 use_inspector_cam=False,
+                 inspector_cam_config: CameraConfig = None
                  ):
         self.left_shoulder_camera = (
             CameraConfig() if left_shoulder_camera is None
@@ -85,6 +88,11 @@ class ObservationConfig(object):
         self.record_gripper_closing = record_gripper_closing
         self.task_low_dim_state = task_low_dim_state
         self.record_ignore_collisions = record_ignore_collisions
+        self.use_inspector_cam = use_inspector_cam
+        if inspector_cam_config is None:
+            self.inspector_cam_config = CameraConfig(mask=False, image_size=(720, 720))
+        else:
+            self.inspector_cam_config = inspector_cam_config
 
     def set_all(self, value: bool):
         self.set_all_high_dim(value)
