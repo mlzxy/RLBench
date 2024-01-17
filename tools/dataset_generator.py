@@ -465,6 +465,21 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
     rlbench_env.shutdown()
 
 
+def split_array_into_chunks(arr, n):
+    if n <= 0:
+        return "Number of chunks should be greater than 0"
+
+    chunk_size = len(arr) // n
+    chunks = [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]
+
+    # Adjusting last chunk in case of uneven division
+    if len(chunks) > n:
+        chunks[-2] += chunks[-1]
+        chunks = chunks[:-1]
+
+    return chunks
+
+
 def main(argv):
     task_files = [
         t.replace(".py", "")
@@ -542,6 +557,9 @@ def main(argv):
                 ]
         elif FLAGS.tasks[0].startswith('all'):
             task_files = RVT_TASKS + NOVEL_TASKS
+            chunks = split_array_into_chunks(task_files, 4)
+            task_files = chunks[int(FLAGS.tasks[0][-1])] 
+            print(task_files)
         else:
             for t in FLAGS.tasks:
                 if t not in task_files:
