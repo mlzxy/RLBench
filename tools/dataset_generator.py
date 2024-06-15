@@ -155,7 +155,7 @@ def save_demo(demo, example_path, variation, skip_images=False):
             front_rgb.save(os.path.join(front_rgb_path, IMAGE_FORMAT % i))
             front_depth.save(os.path.join(front_depth_path, IMAGE_FORMAT % i))
             front_mask.save(os.path.join(front_mask_path, IMAGE_FORMAT % i))
-        
+
         if obs.inspector_rgb is not None:
             inspector_rgb = Image.fromarray(obs.inspector_rgb)
             inspector_depth = utils.float_array_to_rgb_image(
@@ -413,6 +413,7 @@ def run_all_variations(i, lock, task_index, variation_count, results, file_lock,
             while attempts > 0:
                 try:
                     variation = np.random.randint(possible_variations)
+                    #variation = np.random.choice([7,8]) # debug
                     task_env = rlbench_env.get_task(t)
                     task_env.set_variation(variation)
                     descriptions, obs = task_env.reset()
@@ -488,7 +489,7 @@ def main(argv):
     ]
 
     if len(FLAGS.tasks) > 0:
-        RVT_TASKS = [
+        BASE_TASKS = [
             "put_item_in_drawer",
             "reach_and_drag",
             "turn_tap",
@@ -510,42 +511,42 @@ def main(argv):
         ]
 
         NOVEL_TASKS = [
-            "take_money_out_safe", 
+            "take_money_out_safe",
             "take_umbrella_out_of_umbrella_stand",
             "slide_cabinet_open_and_place_cups",
             "take_toilet_roll_off_stand",
-            
-            "basketball_in_hoop", 
+
+            "basketball_in_hoop",
             "straighten_rope",
             "put_rubbish_in_bin",
-            "tv_on", 
-            "scoop_with_spatula", 
-            "place_hanger_on_rack", 
-            "hit_ball_with_queue", 
-            "block_pyramid", 
-            "take_lid_off_saucepan", 
-            "lamp_on", 
-            "phone_on_base", 
-            "open_box", 
-            "close_laptop_lid", 
-            "beat_the_buzz", 
-            "remove_cups", 
-            "play_jenga", 
-            "put_knife_on_chopping_board", 
-            "change_clock", 
-            "open_window", 
-            "open_wine_bottle", 
+            "tv_on",
+            "scoop_with_spatula",
+            "place_hanger_on_rack",
+            "hit_ball_with_queue",
+            "block_pyramid",
+            "take_lid_off_saucepan",
+            "lamp_on",
+            "phone_on_base",
+            "open_box",
+            "close_laptop_lid",
+            "beat_the_buzz",
+            "remove_cups",
+            "play_jenga",
+            "put_knife_on_chopping_board",
+            "change_clock",
+            "open_window",
+            "open_wine_bottle",
             "open_door",
             "close_microwave"
         ]
 
-        if FLAGS.tasks[0].startswith("rvt"):
-            if FLAGS.tasks[0] == "rvt":
-                task_files = RVT_TASKS
+        if FLAGS.tasks[0].startswith("base"):
+            if FLAGS.tasks[0] == "base":
+                task_files = BASE_TASKS
             else:
                 task_ind = int(FLAGS.tasks[0][3:])
                 task_files = [
-                    RVT_TASKS[task_ind],
+                    BASE_TASKS[task_ind],
                 ]
         elif FLAGS.tasks[0].startswith("novel"):
             if FLAGS.tasks[0] == "novel":
@@ -556,9 +557,9 @@ def main(argv):
                     NOVEL_TASKS[task_ind],
                 ]
         elif FLAGS.tasks[0].startswith('all'):
-            task_files = RVT_TASKS + NOVEL_TASKS
-            chunks = split_array_into_chunks(task_files, 4)
-            task_files = chunks[int(FLAGS.tasks[0][-1])] 
+            task_files = BASE_TASKS + NOVEL_TASKS
+            chunks = split_array_into_chunks(task_files, 5)
+            task_files = chunks[int(FLAGS.tasks[0][-1])]
             print(task_files)
         else:
             for t in FLAGS.tasks:
